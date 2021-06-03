@@ -1,0 +1,129 @@
+from tensorflow.keras import Model
+import tensorflow as tf
+
+from tensorflow.keras.layers import (
+        Conv2D,
+        Conv2DTranspose,
+        BatchNormalization,
+        Input,
+        Add,
+        ReLU,
+        MaxPool2D,
+        concatenate,
+        Softmax)
+
+def transfer(model,vgg_path='./vgg11'):
+    vgg11 = tf.keras.models.load_model(vgg_path)
+    layersVgg = vgg11.layers 
+    for layerVgg in layersVgg:
+        for layerModel in model.layers[1].layers:
+            try:
+                if layerVgg.get_weights()[0].shape == layerModel.get_weights()[0].shape:
+                    layerModel.set_weights([layerVgg.get_weights()[0]])
+                    layerModel.trainable = False
+                    break
+            except:
+                pass
+
+def convBlock(filters):
+    def block(x):
+        x_i = x
+        x = Conv2D(filters=filters,kernel_size=3,padding='same',use_bias=False)(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Conv2D(filters=filters,kernel_size=3,padding='same',use_bias=False)(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x_i = Conv2D(filters=filters,kernel_size=1,padding='same',use_bias=False)(x_i)
+        x = Add()([x,x_i])
+        return x 
+    return block
+
+def go_down(name='encoder'):
+    x = input_ = Input([None,None,3])
+    x = level1 = convBlock(filters=64)(x)
+    x = MaxPool2D()(x)
+
+    x = level2 = convBlock(filters=128)(x)
+    x = MaxPool2D()(x)
+
+    x = level3 = convBlock(filters=256)(x)
+    x = MaxPool2D()(x)
+
+    x = level4 = convBlock(filters=512)(x)
+    x = MaxPool2D()(x)
+
+    x = convBlock(filters=512)(x)
+    return Model(input_,(x,level4,level3,level2,level1),name=name)
+    
+def go_up(name='decoder'):
+    shape = [512,512,256,128,64]
+    X = input_ = [Input(shape=[None,None,i]) for i in shape]
+    x = Conv2DTranspose(filters=256//2,kernel_size=2,strides=2,use_bias=False)(X[0])
+    x = concatenate([x,X[1]])
+    x = convBlock(filters=256)(x)
+
+    x = Conv2DTranspose(filters=128//2,kernel_size=2,strides=2,use_bias=False)(x)
+    x = concatenate([x,X[2]])
+    x = convBlock(filters=128)(x)
+
+    x = Conv2DTranspose(filters=64//2,kernel_size=2,strides=2,use_bias=False)(x)
+    x = concatenate([x,X[3]])
+    x = convBlock(filters=64)(x)
+
+    x = Conv2DTranspose(filters=64//2,kernel_size=2,strides=2,use_bias=False)(x)
+    x = concatenate([x,X[4]])
+    x = convBlock(filters=64)(x)
+
+    x = Conv2D(filters=1,kernel_size=3,padding='same',activation='sigmoid',use_bias=False)(x)
+    #x = Softmax()(x)
+    return Model(input_,x,name=name)
+
+def get_model(name='UNet2D'):
+    x = input_ = Input(shape=(None,None,3))
+    X = go_down()(x)
+    x = go_up()(X)
+    return Model(input_,x,name=name)
+
+def get_model_transfer(name='UNet2D',vgg_path='./model/vgg11'):
+    model = get_model(name=name)
+    transfer(model,vgg_path=vgg_path)
+    return model 
+
+
+def load_models():
+    model_sagital = get_model(name='sagital')
+    latest = tf.train.latest_checkpoint('./model/weights_sagital/')
+    model_sagital.load_weights(latest).expect_partial()
+
+    model_coronal = get_model(name='coronal')
+    latest = tf.train.latest_checkpoint('./model/weights_coronal/')
+    model_coronal.load_weights(latest).expect_partial()
+
+    model_axial = get_model(name='axial')
+    latest = tf.train.latest_checkpoint('./model/weights_axial/')
+    model_axial.load_weights(latest).expect_partial()
+
+    return model_sagital,model_coronal,model_axial
+
+
+if __name__ == "__main__":
+    model_sagital = get_model_transfer('unet')
+    model_sagital.summary()
+    model_sagital.save_weights('./weights/weights.cpkt')
+    model_sagital.load_weights('./model/weights_sagital/cp-0001.ckpt')
+
+    model_coronal = get_model_transfer('unet')
+    model_coronal.summary()
+    model_coronal.save_weights('./weights/weights.cpkt')
+    model_coronal.load_weights('./weights/weights.cpkt')
+
+    model_axial = get_model_transfer('unet')
+    model_axial.summary()
+    model_axial.save_weights('./weights/weights.cpkt')
+    model_axial.load_weights('./weights/weights.cpkt')
+
+    matrix = tf.zeros((1,160,160,3))
+    vol = model_sagital.predict(matrix)
+    print(print(vol.shape))
+
