@@ -111,7 +111,7 @@ def main():
                                     validation_data=val_axial
                                     )
 
-    if args.evaluate and args.test_dataset != None:                                
+    if args.evaluate and test_dataset != None:                                
         logging.info('evaluating...')
         model_sagital
         data = sorted(glob(os.paht.join(test_dataset,'*.nii')))
