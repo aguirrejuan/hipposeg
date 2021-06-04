@@ -60,10 +60,10 @@ def main():
     val_axial  =  get_data(val_dataset,val_dataset_label,axis=2)
 
     if args.fine_tune:
-        print(f'{'='*10}fine_tune{'='*10}')
+        print('fine_tune')
         model_sagital,model_coronal,model_axial = load_models()
     else:
-        print(f'{'='*10}from_scratch{'='*10}')
+        print('from_scratch')
         model_sagital = get_model_transfer(name='sagital')
         model_coronal = get_model_transfer(name='coronal')
         model_axial = get_model_transfer(name='axial')
