@@ -6,7 +6,7 @@ from utils.get_data import get_data
 from evaluate import print_metrics,scores
 from glob import glob 
 import os 
-
+import nibabel as nib
 import argparse
 
 parser = argparse.ArgumentParser(description='Traing the model')
