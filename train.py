@@ -20,13 +20,13 @@ parser.add_argument('--test_path_label', help='path to data labels',default= Non
 parser.add_argument('--val_path', help='path to data with out labels',default=None)
 parser.add_argument('--val_path_label', help='path to data labels',default=None)
 
-parser.add_argument('--save_freq',help='epochs save', default=1)
+parser.add_argument('--save_freq',help='epochs save', default=1 ,type=int)
 
-parser.add_argument('--epochs',help='epochs training', default=1)
+parser.add_argument('--epochs',help='epochs training', default=1, type=int)
 
-parser.add_argument('--fine_tune',help='epochs training', default=0)
+parser.add_argument('--fine_tune',help='epochs training',action='store_true')
 
-parser.add_argument('--evaluate',help='evaluate Model', default=0)
+parser.add_argument('--evaluate',help='evaluate Model', action='store_true')
 
 args = parser.parse_args()
 
