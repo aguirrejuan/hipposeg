@@ -7,11 +7,6 @@ from glob import glob
 import os
 import argparse
 
-parser = argparse.ArgumentParser(description='Evaluate Model')
-parser.add_argument('--path_data_mask',help='path to data')
-parser.add_argument('--path_data_pred',help='path to data label')
-
-args = parser.parse_args()
 
 def metrics(y,y_pred):
     return [jaccard(y,y_pred),dice(y,y_pred),precision(y,y_pred),recall(y,y_pred)]
@@ -32,6 +27,11 @@ def print_metrics(name,scores):
     print('')
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Evaluate Model')
+    parser.add_argument('--path_data_mask',help='path to data')
+    parser.add_argument('--path_data_pred',help='path to data label')
+    args = parser.parse_args()
+
     data = sorted(glob(os.paht.join(arg.path_data_mask,'*.nii')))
     data_label = sorted(glob(os.paht.join(arg.path_data_pred,'*.nii')))
     scr = scores(data,data_label)

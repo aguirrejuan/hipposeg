@@ -10,11 +10,6 @@ from datetime import datetime
 
 import argparse 
 
-parser = argparse.ArgumentParser(description='Traing the model')
-parser.add_argument('--path_vol',help='path to volume')
-
-args = parser.parse_args()
-
 def predict_axis(model,generator,shape):
     vol = np.zeros((shape,cfg.CROP,cfg.CROP))
     for i in tqdm(range(shape)):
@@ -42,6 +37,10 @@ def predict(vol_path):
     return output/3
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Traing the model')
+    parser.add_argument('--path_vol',help='path to volume')
+
+    args = parser.parse_args()
     vol_path = args.path_vol
     vol = predict(vol_path).numpy()
     vol = nib.Nifti1Image(vol, np.eye(4))
