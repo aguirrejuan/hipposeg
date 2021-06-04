@@ -114,8 +114,8 @@ def main():
     if args.evaluate and test_dataset != None:                                
         logging.info('evaluating...')
         model_sagital
-        data = sorted(glob(os.paht.join(test_dataset,'*.nii')))
-        data_label = sorted(glob(os.paht.join(test_dataset_label,'*.nii')))
+        data = sorted(glob(os.path.join(test_dataset,'*.nii')))
+        data_label = sorted(glob(os.path.join(test_dataset_label,'*.nii')))
         scr = scores(data,data_label)
         print_metrics('results',scr)
 
