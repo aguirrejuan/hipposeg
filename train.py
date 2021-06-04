@@ -1,7 +1,11 @@
 
 import tensorflow as tf
+import logging
 from model.model import get_model_transfer, load_models
 from utils.get_data import get_data
+from evaluate import print_metrics,scores
+from glob import glob 
+import os 
 
 import argparse
 
@@ -13,14 +17,16 @@ parser.add_argument('--train_path_label', help='path to data labels',default='./
 parser.add_argument('--test_path', help='path to data with out labels',default='./registers/')
 parser.add_argument('--test_path_label', help='path to data labels',default='./masks/')
 
-parser.add_argument('--val_path', help='path to data with out labels',default='./registers/')
-parser.add_argument('--val_path_label', help='path to data labels',default='./masks/')
+parser.add_argument('--val_path', help='path to data with out labels',default=None)
+parser.add_argument('--val_path_label', help='path to data labels',default=None)
 
 parser.add_argument('--save_freq',help='epochs save', default=1)
 
 parser.add_argument('--epochs',help='epochs training', default=1)
 
 parser.add_argument('--fine_tune',help='epochs training', default=0)
+
+parser.add_argument('--evaluate',help='evaluate Model', default=0)
 
 args = parser.parse_args()
 
@@ -47,23 +53,24 @@ def main():
     val_dataset_label = args.val_path_label
     epochs = args.epochs
 
-    train_sagital = get_data(train_dataset,train_dataset_label, axis=0)
-    test_sagital  =  get_data(test_dataset,test_dataset_label,axis=0)
-    val_sagital  =  get_data(val_dataset,val_dataset_label,axis=0)
+    train_sagital =  get_data(train_dataset,train_dataset_label, axis=0)
+    #test_sagital  =  get_data(test_dataset,test_dataset_label,axis=0)
+    val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0)
 
     train_coronal = get_data(train_dataset,train_dataset_label,axis=1)
-    test_coronal  = get_data(test_dataset,test_dataset_label,axis=1)
+    #test_coronal  = get_data(test_dataset,test_dataset_label,axis=1)
     val_coronal  =  get_data(val_dataset,val_dataset_label,axis=1)
 
     train_axial = get_data(train_dataset,train_dataset_label,axis=2)
-    test_axial  = get_data(test_dataset,test_dataset_label,axis=2)
+    #test_axial  = get_data(test_dataset,test_dataset_label,axis=2)
     val_axial  =  get_data(val_dataset,val_dataset_label,axis=2)
 
+    logging.info('Loading Model')
     if args.fine_tune:
-        print('fine_tune')
+        logging.info('Loading Model for Fine Tune')
         model_sagital,model_coronal,model_axial = load_models()
     else:
-        print('from_scratch')
+        logging.info('fLoading Model From scratch')
         model_sagital = get_model_transfer(name='sagital')
         model_coronal = get_model_transfer(name='coronal')
         model_axial = get_model_transfer(name='axial')
@@ -73,6 +80,7 @@ def main():
     model_coronal.compile(loss=Dice_loss,metrics=tf.keras.metrics.BinaryAccuracy())
     model_axial.compile(loss=Dice_loss,metrics=tf.keras.metrics.BinaryAccuracy())
 
+    logging.info('Get cardinality of dataset(in slides for each axis)')
     batch_sagital = int(train_sagital.reduce(0, lambda x, _: x + 1).numpy())
     batch_coronal = int(train_coronal.reduce(0, lambda x, _: x + 1).numpy())
     batch_axial = int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
@@ -81,7 +89,7 @@ def main():
     cp_callback_coronal = get_callback('coronal',batch_coronal,args.save_freq)
     cp_callback_axial = get_callback('axial', batch_axial,args.save_freq)
 
-
+    logging.info('Trainig')
     history_sagital = model_sagital.fit(train_sagital,epochs=epochs,
                                    callbacks=[cp_callback_sagital,
                                    tf.keras.callbacks.TensorBoard(log_dir='./model/sagital_logs')],
@@ -100,6 +108,13 @@ def main():
                                     validation_data=val_axial
                                     )
 
+    if args.evaluate:                                
+        logging.info('evaluating...')
+        model_sagital
+        data = sorted(glob(os.paht.join(test_dataset,'*.nii')))
+        data_label = sorted(glob(os.paht.join(test_dataset_label,'*.nii')))
+        scr = scores(data,data_label)
+        print_metrics('results',scr)
 
 if __name__ == "__main__":
     main()
