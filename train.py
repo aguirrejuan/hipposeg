@@ -52,16 +52,16 @@ def main():
     val_dataset = args.val_path
     val_dataset_label = args.val_path_label
     epochs = args.epochs
-
-    train_sagital =  get_data(train_dataset,train_dataset_label, axis=0)
+    batch_size = 50
+    train_sagital =  get_data(train_dataset,train_dataset_label, axis=0,batch=batch_size)
     #test_sagital  =  get_data(test_dataset,test_dataset_label,axis=0)
     val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0) if val_dataset != None else None 
 
-    train_coronal = get_data(train_dataset,train_dataset_label,axis=1)
+    train_coronal = get_data(train_dataset,train_dataset_label,axis=1,batch=batch_size)
     #test_coronal  = get_data(test_dataset,test_dataset_label,axis=1)
     val_coronal  =  get_data(val_dataset,val_dataset_label,axis=1) if val_dataset != None else None 
 
-    train_axial = get_data(train_dataset,train_dataset_label,axis=2)
+    train_axial = get_data(train_dataset,train_dataset_label,axis=2,batch=batch_size)
     #test_axial  = get_data(test_dataset,test_dataset_label,axis=2)
     val_axial  =  get_data(val_dataset,val_dataset_label,axis=2) if val_dataset != None else None 
 
@@ -84,9 +84,9 @@ def main():
     list_data = glob(os.path.join(args.train_path,'*.nii'))
     lenght_data = len(list_data)
     shape = nib.load(list_data[0]).get_fdata().shape
-    batch_sagital = shape[0]*lenght_data#int(train_sagital.reduce(0, lambda x, _: x + 1).numpy())
-    batch_coronal = shape[1]*lenght_data#int(train_coronal.reduce(0, lambda x, _: x + 1).numpy())
-    batch_axial = shape[2]*lenght_data #int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
+    batch_sagital = shape[0]*lenght_data//batch_size#int(train_sagital.reduce(0, lambda x, _: x + 1).numpy())
+    batch_coronal = shape[1]*lenght_data//batch_size#int(train_coronal.reduce(0, lambda x, _: x + 1).numpy())
+    batch_axial = shape[2]*lenght_data//batch_size #int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
 
     cp_callback_sagital = get_callback('sagital',batch_sagital,args.save_freq)
     cp_callback_coronal = get_callback('coronal',batch_coronal,args.save_freq)
