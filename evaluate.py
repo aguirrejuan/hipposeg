@@ -19,11 +19,10 @@ def metrics(y,y_pred):
 def scores(data,data_label):
     scores = []
     for x,y in zip(data,data_label):
-        x =  tf.cast(tf.squeeze(predict(x)) >0.5,dtype=tf.float64)
+        y = nib.load(y).get_fdata()
+        y_pred =  tf.cast(tf.squeeze(predict(x)) >0.5,dtype=tf.float64)
         y = tf.cast(tf.squeeze(y) >0.5,dtype=tf.float64)
-        if np.sum(y) == 0:
-            continue
-        scores.append(metrics(x,y))
+        scores.append(metrics(y,y_pred))
     return np.array(scores).mean(axis=0),np.array(scores).std(axis=0)
 
 def print_metrics(name,scores):
