@@ -6,7 +6,7 @@ import tensorflow as tf
 from glob import glob 
 import os
 import argparse
-
+import nibabel as nib
 
 def metrics(y,y_pred):
     return [jaccard(y,y_pred),dice(y,y_pred),precision(y,y_pred),recall(y,y_pred)]
