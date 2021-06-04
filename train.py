@@ -70,7 +70,7 @@ def main():
         logging.info('Loading Model for Fine Tune')
         model_sagital,model_coronal,model_axial = load_models()
     else:
-        logging.info('fLoading Model From scratch')
+        logging.info('Loading Model From scratch')
         model_sagital = get_model_transfer(name='sagital')
         model_coronal = get_model_transfer(name='coronal')
         model_axial = get_model_transfer(name='axial')
@@ -86,7 +86,7 @@ def main():
     shape = nib.load(list_data[0]).get_fdata().shape
     batch_sagital = shape[0]*lenght_data#int(train_sagital.reduce(0, lambda x, _: x + 1).numpy())
     batch_coronal = shape[1]*lenght_data#int(train_coronal.reduce(0, lambda x, _: x + 1).numpy())
-    batch_axial = shape[2]*lenght_data#int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
+    batch_axial = shape[2]*lenght_data #int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
 
     cp_callback_sagital = get_callback('sagital',batch_sagital,args.save_freq)
     cp_callback_coronal = get_callback('coronal',batch_coronal,args.save_freq)
@@ -111,7 +111,7 @@ def main():
                                     validation_data=val_axial
                                     )
 
-    if args.evaluate and arg.test_dataset != None:                                
+    if args.evaluate and args.test_dataset != None:                                
         logging.info('evaluating...')
         model_sagital
         data = sorted(glob(os.paht.join(test_dataset,'*.nii')))
