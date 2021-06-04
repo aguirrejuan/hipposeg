@@ -14,8 +14,8 @@ parser = argparse.ArgumentParser(description='Traing the model')
 parser.add_argument('--train_path', help='path to data with out labels', default='./registers/')
 parser.add_argument('--train_path_label', help='path to data labels',default='./masks/')
 
-parser.add_argument('--test_path', help='path to data with out labels',default='./registers/')
-parser.add_argument('--test_path_label', help='path to data labels',default='./masks/')
+parser.add_argument('--test_path', help='path to data with out labels',default=None)
+parser.add_argument('--test_path_label', help='path to data labels',default= None)
 
 parser.add_argument('--val_path', help='path to data with out labels',default=None)
 parser.add_argument('--val_path_label', help='path to data labels',default=None)
@@ -55,15 +55,15 @@ def main():
 
     train_sagital =  get_data(train_dataset,train_dataset_label, axis=0)
     #test_sagital  =  get_data(test_dataset,test_dataset_label,axis=0)
-    val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0)
+    val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0) if val_dataset != None else None 
 
     train_coronal = get_data(train_dataset,train_dataset_label,axis=1)
     #test_coronal  = get_data(test_dataset,test_dataset_label,axis=1)
-    val_coronal  =  get_data(val_dataset,val_dataset_label,axis=1)
+    val_coronal  =  get_data(val_dataset,val_dataset_label,axis=1) if val_dataset != None else None 
 
     train_axial = get_data(train_dataset,train_dataset_label,axis=2)
     #test_axial  = get_data(test_dataset,test_dataset_label,axis=2)
-    val_axial  =  get_data(val_dataset,val_dataset_label,axis=2)
+    val_axial  =  get_data(val_dataset,val_dataset_label,axis=2) if val_dataset != None else None 
 
     logging.info('Loading Model')
     if args.fine_tune:
@@ -108,7 +108,7 @@ def main():
                                     validation_data=val_axial
                                     )
 
-    if args.evaluate:                                
+    if args.evaluate and arg.test_dataset != None:                                
         logging.info('evaluating...')
         model_sagital
         data = sorted(glob(os.paht.join(test_dataset,'*.nii')))
