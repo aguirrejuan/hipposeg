@@ -89,7 +89,7 @@ def rotation_and_scale(x,y):
     x = tf.image.resize(x,[scale[0],scale[1]])
     y = tf.image.resize(y[...,tf.newaxis],[scale[0],scale[1]])
     x = tfa.image.transform_ops.rotate(x, angle)
-    y = tfa.image.transform_ops.rotate(y, angle)
+    y = tfa.image.transform_ops.rotate(y, angle) > 0.5
     
     return crop(tf.cast(x,tf.float64)),crop(tf.cast(y,tf.float64))
 
