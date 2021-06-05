@@ -8,6 +8,8 @@ import nibabel as nib
 from glob import glob 
 import os 
 
+from utils.config import cfg
+
 from utils.plot import plot_predict
 
 def minmax_normalization(x):
@@ -16,7 +18,7 @@ def minmax_normalization(x):
 def crop(X):
     cx= tf.shape(X)[0]//2
     cy= tf.shape(X)[1]//2
-    b = 160//2
+    b = cfg.CROP//2
     return X[cx-b:cx+b,cy-b:cy+b,...]
 
 def get_slides(X,axis):
@@ -92,9 +94,9 @@ def rotation_and_scale(x,y):
     return crop(tf.cast(x,tf.float64)),crop(tf.cast(y,tf.float64))
 
 def get_data(dataset,dataset_label,
-             axis,batch=50,buffer_size=100,prefetch=10):
+             axis,batch=50,buffer_size=100,prefetch=10,repeat=1):
     data = get_data_2d(dataset,dataset_label,axis=axis)
-    data = data.repeat(4)
+    data = data.repeat(repeat)
     data = data.map(lambda x,y : rotation_and_scale(x,y))
     data = data.map(lambda x,y : (intensity_modification(x),y))
     data = data.map(lambda x,y : (gaussian_noise(x),y))

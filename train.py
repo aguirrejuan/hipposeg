@@ -26,6 +26,8 @@ parser.add_argument('--epochs',help='epochs training', default=1, type=int)
 
 parser.add_argument('--batch_size',help='epochs training', default=50, type=int)
 
+parser.add_argument('--repeat',help='epochs training', default=1, type=int)
+
 parser.add_argument('--fine_tune',help='epochs training',action='store_true')
 
 parser.add_argument('--evaluate',help='evaluate Model', action='store_true')
@@ -57,16 +59,17 @@ def main():
     val_dataset_label = args.val_path_label
     epochs = args.epochs
     batch_size = args.batch_size
+    repeat = args.repeat
     
-    train_sagital =  get_data(train_dataset,train_dataset_label, axis=0,batch=batch_size)
+    train_sagital =  get_data(train_dataset,train_dataset_label, axis=0,batch=batch_size,repeat=repeat)
     #test_sagital  =  get_data(test_dataset,test_dataset_label,axis=0)
-    val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0) if val_dataset != None else None 
+    val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0,repeat=repeat) if val_dataset != None else None 
 
-    train_coronal = get_data(train_dataset,train_dataset_label,axis=1,batch=batch_size)
+    train_coronal = get_data(train_dataset,train_dataset_label,axis=1,batch=batch_size,repeat=repeat)
     #test_coronal  = get_data(test_dataset,test_dataset_label,axis=1)
     val_coronal  =  get_data(val_dataset,val_dataset_label,axis=1) if val_dataset != None else None 
 
-    train_axial = get_data(train_dataset,train_dataset_label,axis=2,batch=batch_size)
+    train_axial = get_data(train_dataset,train_dataset_label,axis=2,batch=batch_size,repeat=repeat)
     #test_axial  = get_data(test_dataset,test_dataset_label,axis=2)
     val_axial  =  get_data(val_dataset,val_dataset_label,axis=2) if val_dataset != None else None 
 
