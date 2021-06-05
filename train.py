@@ -24,9 +24,13 @@ parser.add_argument('--save_freq',help='epochs save', default=1 ,type=int)
 
 parser.add_argument('--epochs',help='epochs training', default=1, type=int)
 
+parser.add_argument('--batch_size',help='epochs training', default=50, type=int)
+
 parser.add_argument('--fine_tune',help='epochs training',action='store_true')
 
 parser.add_argument('--evaluate',help='evaluate Model', action='store_true')
+
+
 
 args = parser.parse_args()
 
@@ -52,7 +56,8 @@ def main():
     val_dataset = args.val_path
     val_dataset_label = args.val_path_label
     epochs = args.epochs
-    batch_size = 50
+    batch_size = args.batch_size
+    
     train_sagital =  get_data(train_dataset,train_dataset_label, axis=0,batch=batch_size)
     #test_sagital  =  get_data(test_dataset,test_dataset_label,axis=0)
     val_sagital  =   get_data(val_dataset,val_dataset_label,axis=0) if val_dataset != None else None 
