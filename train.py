@@ -92,9 +92,9 @@ def main():
     list_data = glob(os.path.join(args.train_path,'*.nii'))
     lenght_data = len(list_data)
     shape = nib.load(list_data[0]).get_fdata().shape
-    batch_sagital = shape[0]*lenght_data//batch_size#int(train_sagital.reduce(0, lambda x, _: x + 1).numpy())
-    batch_coronal = shape[1]*lenght_data//batch_size#int(train_coronal.reduce(0, lambda x, _: x + 1).numpy())
-    batch_axial = shape[2]*lenght_data//batch_size #int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
+    batch_sagital = repeat*shape[0]*lenght_data//batch_size#int(train_sagital.reduce(0, lambda x, _: x + 1).numpy())
+    batch_coronal = repeat*shape[1]*lenght_data//batch_size#int(train_coronal.reduce(0, lambda x, _: x + 1).numpy())
+    batch_axial = repeat*shape[2]*lenght_data//batch_size #int(train_axial.reduce(0, lambda x, _: x + 1).numpy())
 
     cp_callback_sagital = get_callback('sagital',batch_sagital,args.save_freq)
     cp_callback_coronal = get_callback('coronal',batch_coronal,args.save_freq)
