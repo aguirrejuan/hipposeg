@@ -64,7 +64,7 @@ def main():
     
     models = ['sagital','coronal','axial']
     for i in range(3):
-        if str(i) in not args.models:
+        if str(i) not in args.models:
             continue
 
         train =  get_data(train_dataset,train_dataset_label, axis=i,batch=batch_size,repeat=repeat)
