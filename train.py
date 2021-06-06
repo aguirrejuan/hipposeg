@@ -64,10 +64,12 @@ def main():
     
     models = ['sagital','coronal','axial']
     for i in range(3):
-        if str(i) in args.models:
-            train =  get_data(train_dataset,train_dataset_label, axis=i,batch=batch_size,repeat=repeat)
-            #test  =  get_data(test_dataset,test_dataset_label,axis=i)
-            val  =   get_data(val_dataset,val_dataset_label,axis=i,repeat=repeat) if val_dataset != None else None 
+        if str(i) in not args.models:
+            continue
+
+        train =  get_data(train_dataset,train_dataset_label, axis=i,batch=batch_size,repeat=repeat)
+        #test  =  get_data(test_dataset,test_dataset_label,axis=i)
+        val  =   get_data(val_dataset,val_dataset_label,axis=i,repeat=repeat) if val_dataset != None else None 
 
         logging.info('Loading Model')
         if args.fine_tune:
@@ -95,7 +97,7 @@ def main():
                                     validation_data=val
                                     )
 
-    if args.evaluate and test_dataset != None and '0123' ind args.models:                                
+    if args.evaluate and test_dataset != None and '012' ind args.models:                                
         logging.info('evaluating...')
         data = sorted(glob(os.path.join(test_dataset,'*.nii')))
         data_label = sorted(glob(os.path.join(test_dataset_label,'*.nii')))
