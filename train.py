@@ -74,7 +74,7 @@ def main():
         logging.info('Loading Model')
         if args.fine_tune:
             logging.info('Loading Model for Fine Tune')
-            model = load_model(name=models[i],dir_weights=f'./model/weights_{models[i]}/'):
+            model = load_model(name=models[i],dir_weights=f'./model/weights_{models[i]}/')
         else:
             logging.info('Loading Model From scratch')
             model = get_model_transfer(name=models[i])
