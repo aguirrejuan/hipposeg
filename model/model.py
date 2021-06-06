@@ -91,19 +91,17 @@ def get_model_transfer(name='UNet2D',vgg_path='./model/vgg11'):
     return model 
 
 
+def load_model(name='name',dir_weights='./model/weights_sagital/'):
+    model = get_model(name=name)
+    latest = tf.train.latest_checkpoint(dir_weights)
+    model.load_weights(latest).expect_partial()
+    return model
+
+
 def load_models():
-    model_sagital = get_model(name='sagital')
-    latest = tf.train.latest_checkpoint('./model/weights_sagital/')
-    model_sagital.load_weights(latest).expect_partial()
-
-    model_coronal = get_model(name='coronal')
-    latest = tf.train.latest_checkpoint('./model/weights_coronal/')
-    model_coronal.load_weights(latest).expect_partial()
-
-    model_axial = get_model(name='axial')
-    latest = tf.train.latest_checkpoint('./model/weights_axial/')
-    model_axial.load_weights(latest).expect_partial()
-
+    model_sagital = load_model(name='sagital',dir_weights='./model/weights_sagital/')
+    model_coronal = load_model(name='coronal',dir_weights='./model/weights_coronal/')
+    model_axial = load_model(name='axial',dir_weights='./model/weights_axial/')
     return model_sagital,model_coronal,model_axial
 
 
