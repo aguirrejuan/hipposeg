@@ -97,7 +97,7 @@ def main():
                                     validation_data=val
                                     )
 
-    if args.evaluate and test_dataset != None and '012' ind args.models:                                
+    if args.evaluate and test_dataset != None and '012' in args.models:                                
         logging.info('evaluating...')
         data = sorted(glob(os.path.join(test_dataset,'*.nii')))
         data_label = sorted(glob(os.path.join(test_dataset_label,'*.nii')))
