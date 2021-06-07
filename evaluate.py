@@ -28,11 +28,11 @@ def print_metrics(name,scores):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Evaluate Model')
-    parser.add_argument('--path_data_mask',help='path to data')
-    parser.add_argument('--path_data_pred',help='path to data label')
+    parser.add_argument('--path_data',help='path to data')
+    parser.add_argument('--path_data_label',help='path to data label')
     args = parser.parse_args()
 
-    data = sorted(glob(os.paht.join(arg.path_data_mask,'*.nii')))
-    data_label = sorted(glob(os.paht.join(arg.path_data_pred,'*.nii')))
+    data = sorted(glob(os.path.join(args.path_data,'*.nii')))
+    data_label = sorted(glob(os.path.join(args.path_data_label,'*.nii')))
     scr = scores(data,data_label)
     print_metrics('results',scr)
