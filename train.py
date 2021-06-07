@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 import logging
-from model.model import get_model_transfer, load_models
+from model.model import get_model_transfer, load_models,load_model
 from utils.get_data import get_data
 from evaluate import print_metrics,scores
 from glob import glob 
