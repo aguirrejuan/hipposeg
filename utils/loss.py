@@ -8,7 +8,7 @@ def distMaps(seg):
     return eucl_distance(negmask)* negmask - (eucl_distance(posmask) - 1) * posmask
 
 def boundary_loss(y_true,y_pred):
-    distmap = tf.py_function(func= distMaps, inp=[y_true], Tout=tf.float32)
+    dist_map = tf.py_function(func=distMaps, inp=[y_true], Tout=tf.float32)
     value = (dist_map*x_pred - dist_map*x)
     return tf.reduce_sum(value)
 
