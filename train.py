@@ -3,6 +3,7 @@ import tensorflow as tf
 import logging
 from model.model import get_model_transfer, load_models,load_model
 from utils.get_data import get_data
+from utils.loss import Dice_loss, boundary_loss
 from evaluate import print_metrics,scores
 from glob import glob 
 import os 
@@ -37,10 +38,7 @@ parser.add_argument('--models',help='evaluate Model', default='012')
 
 args = parser.parse_args()
 
-def Dice_loss(y_true,y_pred):
-    nue = 2*tf.reduce_sum(y_true*y_pred)
-    den = tf.reduce_sum(y_true**2) + tf.reduce_sum(y_pred**2)
-    return 1-nue/den
+loss = boundary_loss
 
 def get_callback(name,batch_size,epoch):
     checkpoint_path = f'./model/weights_{name}'+'/cp-{epoch:04d}.ckpt'
@@ -94,7 +92,7 @@ def main():
             else:
                 logging.info('Loading Model From scratch')
                 model = get_model_transfer(name=models[i])
-            model.compile(loss=Dice_loss,metrics=tf.keras.metrics.BinaryAccuracy(),)
+            model.compile(loss=loss,metrics=tf.keras.metrics.BinaryAccuracy(),)
 
         logging.info('Get cardinality of dataset(in slides for each axis)')
         list_data = glob(os.path.join(args.train_path,'*.nii'))
