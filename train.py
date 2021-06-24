@@ -59,7 +59,7 @@ def main():
     val_dataset = args.val_path
     val_dataset_label = args.val_path_label
     epochs = args.epochs
-    batch_size = args.batch_size
+    batch_size_pre = args.batch_size
     repeat = args.repeat
 
 
@@ -81,7 +81,7 @@ def main():
     for i in range(3):
         if str(i) not in args.models:
             continue
-
+        batch_size = batch_size_pre*strategy.num_replicas_in_sync 
         train =  get_data(train_dataset,train_dataset_label, axis=i,batch=batch_size,repeat=repeat)
         #test  =  get_data(test_dataset,test_dataset_label,axis=i)
         val  =   get_data(val_dataset,val_dataset_label,axis=i,repeat=repeat) if val_dataset != None else None 
