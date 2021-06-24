@@ -92,7 +92,7 @@ def main():
             else:
                 logging.info('Loading Model From scratch')
                 model = get_model_transfer(name=models[i])
-            model.compile(loss=loss,metrics=tf.keras.metrics.BinaryAccuracy(),)
+            model.compile(loss=loss,metrics=[Dice_loss,tf.keras.metrics.BinaryAccuracy()],)
 
         logging.info('Get cardinality of dataset(in slides for each axis)')
         list_data = glob(os.path.join(args.train_path,'*.nii'))
