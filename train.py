@@ -61,7 +61,22 @@ def main():
     epochs = args.epochs
     batch_size = args.batch_size
     repeat = args.repeat
-    
+
+
+    tf.random.set_seed(42)
+
+    try:
+        tpu= tf.distribute.cluster_resolver.TPUClusterResolver()
+        print('Running on TPU ', tpu.cluster_spec().as_dict()['worker'])
+    except:
+        tpu = None
+    if tpu: 
+        tf.config.experimental_connect_to_cluster(tpu)
+        tf.tpu.experimental.initialize_tpu_system(tpu)
+        strategy = tf.distribute.experimental.TPUStrategy(tpu)
+    else: 
+        strategy = tf.distribute.get_strategy()
+
     models = ['sagital','coronal','axial']
     for i in range(3):
         if str(i) not in args.models:
@@ -72,14 +87,14 @@ def main():
         val  =   get_data(val_dataset,val_dataset_label,axis=i,repeat=repeat) if val_dataset != None else None 
 
         logging.info('Loading Model')
-        if args.fine_tune:
-            logging.info('Loading Model for Fine Tune')
-            model = load_model(name=models[i],dir_weights=f'./model/weights_{models[i]}/')
-        else:
-            logging.info('Loading Model From scratch')
-            model = get_model_transfer(name=models[i])
-
-        model.compile(loss=Dice_loss,metrics=tf.keras.metrics.BinaryAccuracy(),)
+        with strategy.scope():
+            if args.fine_tune:
+                logging.info('Loading Model for Fine Tune')
+                model = load_model(name=models[i],dir_weights=f'./model/weights_{models[i]}/')
+            else:
+                logging.info('Loading Model From scratch')
+                model = get_model_transfer(name=models[i])
+            model.compile(loss=Dice_loss,metrics=tf.keras.metrics.BinaryAccuracy(),)
 
         logging.info('Get cardinality of dataset(in slides for each axis)')
         list_data = glob(os.path.join(args.train_path,'*.nii'))
