@@ -9,7 +9,7 @@ def distMaps(seg):
 
 def boundary_loss(y_true,y_pred):
     dist_map = tf.py_function(func=distMaps, inp=[y_true], Tout=tf.float32)
-    value = (dist_map*x_pred - dist_map*x)
+    value = (dist_map*y_pred - dist_map*y_true)
     return tf.reduce_sum(value)
 
 def Dice_loss(y_true,y_pred):
