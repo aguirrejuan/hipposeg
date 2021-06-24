@@ -5,7 +5,7 @@ from scipy.ndimage import distance_transform_edt as eucl_distance
 def distMaps(seg):
     posmask = seg > 0.5
     negmask = ~ posmask
-    return eucl_distance(negmask)* negmask - (eucl_distance(posmask) - 1) * posmask
+    return tf.cast(eucl_distance(negmask),dtype=tf.float32)*tf.cast(negmask,tf.float32) - (tf.cast(eucl_distance(posmask),tf.float32) - 1) * tf.cast(posmask,tf.float32)
 
 def boundary_loss(y_true,y_pred):
     dist_map = tf.py_function(func=distMaps, inp=[y_true], Tout=tf.float32)
