@@ -4,7 +4,7 @@ import numpy as np
 
 def distMaps(seg):
     k = tf.shape(seg)[0]
-    res = np.zeros_like(seg,dtype=None)
+    res = np.zeros_like(seg,dtype=np.float32)
     for i in range(k):
         posmask = seg[i,...] > 0.5
         negmask = ~ posmask
