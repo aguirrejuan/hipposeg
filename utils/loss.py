@@ -1,10 +1,10 @@
 import tensorflow as tf
 from scipy.ndimage import distance_transform_edt as eucl_distance
-
+import numpy as np
 
 def distMaps(seg):
     k = tf.shape(seg)[0]
-    res = tf.zeros_like(seg,dtype=tf.float32)
+    res = np.zeros_like(seg,dtype=None)
     for i in range(k):
         posmask = seg[i,...] > 0.5
         negmask = ~ posmask
