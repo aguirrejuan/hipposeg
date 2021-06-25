@@ -1,11 +1,11 @@
 import tensorflow as tf
 from scipy.ndimage import distance_transform_edt as eucl_distance
-import numpy as np
+
 
 def distMaps(seg):
     k = tf.shape(seg)[0]
     res = tf.zeros_like(seg,dtype=tf.float32)
-    for i in k:
+    for i in range(k):
         posmask = seg[i,...] > 0.5
         negmask = ~ posmask
         res[i,...] = tf.cast(eucl_distance(negmask),dtype=tf.float32)*tf.cast(negmask,tf.float32) - (tf.cast(eucl_distance(posmask),tf.float32) - 1) * tf.cast(posmask,tf.float32)
