@@ -61,37 +61,37 @@ def generator_2D(dataset,axis=0):
 
 def get_data_2d(path_mri,path_label,axis=0):
     data = tf.data.Dataset.from_generator(generator_load(path_mri,path_label),
-                                    output_signature = (tf.TensorSpec((None, None, None), tf.float64), 
-                                                        tf.TensorSpec((None, None, None), tf.float64)))
+                                    output_signature = (tf.TensorSpec((None, None, None), tf.float32), 
+                                                        tf.TensorSpec((None, None, None), tf.float32)))
     data = data.map(lambda x,y:(minmax_normalization(x),y))
     data2D = tf.data.Dataset.from_generator(generator_2D(data,axis=axis),
-                                    output_signature = (tf.TensorSpec((None, None,None), tf.float64), 
-                                                        tf.TensorSpec((None,None), tf.float64)))
+                                    output_signature = (tf.TensorSpec((None, None,None), tf.float32), 
+                                                        tf.TensorSpec((None,None), tf.float32)))
     return data2D
 
 
 #======================= DATA augemntation ======================
 def intensity_modification(x):
-    x = x + tf.random.uniform(shape=[], minval=-0.05, maxval=0.05, dtype=tf.dtypes.float64)
+    x = x + tf.random.uniform(shape=[], minval=-0.05, maxval=0.05, dtype=tf.dtypes.float32)
     return x
 
 def gaussian_noise(x):
-    x = x + tf.random.normal(shape=tf.shape(x), mean=0.0, stddev=0.0002, dtype=tf.dtypes.float64)
+    x = x + tf.random.normal(shape=tf.shape(x), mean=0.0, stddev=0.0002, dtype=tf.dtypes.float32)
     return x
 
 def rotation_and_scale(x,y):
-    scale = tf.random.uniform(shape=[], minval=0.8, maxval=1.2, dtype=tf.dtypes.float64)
+    scale = tf.random.uniform(shape=[], minval=0.8, maxval=1.2, dtype=tf.dtypes.float32)
     angle = tf.random.uniform(shape=[], minval=-10*np.pi/180, maxval=10*np.pi/180)
     
-    shape = tf.cast(tf.shape(x),tf.float64)
-    scale = tf.cast([scale*shape[0],scale*shape[1]],tf.float64)
+    shape = tf.cast(tf.shape(x),tf.float32)
+    scale = tf.cast([scale*shape[0],scale*shape[1]],tf.float32)
     
     x = tf.image.resize(x,[scale[0],scale[1]])
     y = tf.image.resize(y[...,tf.newaxis],[scale[0],scale[1]])
     x = tfa.image.transform_ops.rotate(x, angle)
     y = tfa.image.transform_ops.rotate(y, angle) > 0.5
     
-    return crop(tf.cast(x,tf.float64)),crop(tf.cast(y,tf.float64))
+    return crop(tf.cast(x,tf.float32)),crop(tf.cast(y,tf.float32))
 
 def get_data(dataset,dataset_label,
              axis,batch=50,buffer_size=100,prefetch=10,repeat=1):
