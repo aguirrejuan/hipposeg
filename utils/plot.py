@@ -14,5 +14,4 @@ def plot_predict(x,y,y_pred):
     Azul  = mask + tf.cast(tf.math.logical_and(y,~y_pred),dtype=tf.float32)  #false negative
     print(tf.shape(x))
     image =  np.concatenate((Rojo,Verde,Azul),axis=2)
-    plt.imshow(image)
-    plt.show()
+    return image
