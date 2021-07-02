@@ -3,7 +3,7 @@ import tensorflow as tf
 import logging
 from model.model import get_model_transfer, load_models,load_model
 from utils.get_data import get_data
-from utils.loss import Dice_loss, boundary_loss, GDL_loss
+from utils.loss import Dice_loss, boundary_loss, GDL_loss, Dice_metric
 from evaluate import print_metrics,scores
 from glob import glob 
 import os 
@@ -92,7 +92,7 @@ def main():
             else:
                 logging.info('Loading Model From scratch')
                 model = get_model_transfer(name=models[i])
-            model.compile(loss=loss,metrics=[Dice_loss,tf.keras.metrics.BinaryAccuracy()],)
+            model.compile(loss=loss,metrics=[Dice_loss,Dice_metric,tf.keras.metrics.BinaryAccuracy()],)
 
         logging.info('Get cardinality of dataset(in slides for each axis)')
         list_data = glob(os.path.join(args.train_path,'*.nii'))
