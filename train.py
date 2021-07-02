@@ -3,7 +3,7 @@ import tensorflow as tf
 import logging
 from model.model import get_model_transfer, load_models,load_model
 from utils.get_data import get_data
-from utils.loss import Dice_loss, boundary_loss
+from utils.loss import Dice_loss, boundary_loss, GDL_loss
 from evaluate import print_metrics,scores
 from glob import glob 
 import os 
@@ -38,7 +38,7 @@ parser.add_argument('--models',help='evaluate Model', default='012')
 
 args = parser.parse_args()
 
-loss = boundary_loss
+loss = GDL_loss
 
 def get_callback(name,batch_size,epoch):
     checkpoint_path = f'./model/weights_{name}'+'/cp-{epoch:04d}.ckpt'
