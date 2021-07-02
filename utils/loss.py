@@ -45,7 +45,7 @@ def Dice_metric(y_true,y_pred):
     B = tf.shape(y_true)[0]
     res = 0.0
     for b in range(B):
-        if tf.reduce(y_true[B]) == 0:
+        if tf.reduce_sum(y_true[B]) == 0:
             continue 
         y, y_hat = y_true , y_pred
         intersection = tf.einsum('ijk,ijk->i',y,y_hat) #haddamar -> sum j and k for each image
