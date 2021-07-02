@@ -48,8 +48,8 @@ def Dice_metric(y_true,y_pred):
         if tf.reduce_sum(y_true[b]) == 0:
             continue 
         y, y_hat = y_true[b] , y_pred[b]
-        intersection = tf.einsum('ijk,ijk->i',y,y_hat) #haddamar -> sum j and k for each image
-        union = tf.einsum('ijk->i',y**2) + tf.einsum('ijk->i',y_hat**2) #sum  j and k
+        intersection = tf.einsum('ijk,ijk->',y,y_hat) #haddamar -> sum j and k for each image
+        union = tf.einsum('ijk->',y**2) + tf.einsum('ijk->',y_hat**2) #sum  j and k
         res += 1 - 2*intersection/union # dice per image 
     return res/tf.cast(B,tf.float32)
 
