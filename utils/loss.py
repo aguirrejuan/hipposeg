@@ -42,7 +42,7 @@ def boundary_loss(y_true,y_pred):
     return tf.reduce_mean(value)#/tf.reduce_sum(tf.abs(dist_map))
 
 def Dice_metric(y_true,y_pred):
-    B = tf.shape(y_true)
+    B = tf.shape(y_true)[0]
     res = 0.0
     for b in range(B):
         if tf.reduce(y_true[B]) == 0:
