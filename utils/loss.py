@@ -41,6 +41,18 @@ def boundary_loss(y_true,y_pred):
     value = tf.einsum('ijlk,ijlk->i',dist_map,y_pred) #- tf.einsum('ijk,ijk->i',dist_map,y_true)  # tensor[batch]
     return tf.reduce_mean(value)#/tf.reduce_sum(tf.abs(dist_map))
 
+def Dice_metric(y_true,y_pred):
+    B = tf.shape(y_true)
+    res = 0.0
+    for b in range(B):
+        if tf.reduce(y_true[B]) == 0:
+            continue 
+        y, y_hat = y_true , y_pred
+        intersection = tf.einsum('ijk,ijk->i',y,y_hat) #haddamar -> sum j and k for each image
+        union = tf.einsum('ijk->i',y**2) + tf.einsum('ijk->i',y_hat**2) #sum  j and k
+        res += 1 - 2*intersection/union # dice per image 
+    return res/tf.cast(B,tf.float32)
+
 def Dice_loss(y_true,y_pred):
     nue = 2*tf.reduce_sum(y_true*y_pred)
     den = tf.reduce_sum(y_true**2) + tf.reduce_sum(y_pred**2)
