@@ -15,7 +15,7 @@ from utils.plot import plot_predict
 def minmax_normalization(x):
     return (x-tf.reduce_min(x))/(tf.reduce_max(x)-tf.reduce_min(x))
 
-
+cfg.CROP = 160
 def crop(X):
     b = cfg.CROP//2
     shape = tf.shape(X)
@@ -23,7 +23,7 @@ def crop(X):
     cy= shape[1]//2
     return X[cx-b:cx+b,cy-b:cy+b,...]
 
-def crop_random(X,Y,random_crop=False):
+def crop_random(X,Y,random_crop=False,b=cfg.CROP):
     b = cfg.CROP//2
     shape = tf.shape(X)
     if random_crop: 
