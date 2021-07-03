@@ -15,11 +15,25 @@ from utils.plot import plot_predict
 def minmax_normalization(x):
     return (x-tf.reduce_min(x))/(tf.reduce_max(x)-tf.reduce_min(x))
 
+
 def crop(X):
-    cx= tf.shape(X)[0]//2
-    cy= tf.shape(X)[1]//2
     b = cfg.CROP//2
+    shape = tf.shape(X)
+    cx= shape[0]//2
+    cy= shape[1]//2
     return X[cx-b:cx+b,cy-b:cy+b,...]
+
+def crop_random(X,Y,random_crop=False):
+    b = cfg.CROP//2
+    shape = tf.shape(X)
+    if random_crop: 
+        cx = tf.random.uniform(shape=(1,),minval=b,maxval=(shape[0]-b),dtype=tf.int32)[0]
+        cy = tf.random.uniform(shape=(1,),minval=b,maxval=(shape[1]-b),dtype=tf.int32)[0]
+        return X[cx-b:cx+b,cy-b:cy+b,...], Y[cx-b:cx+b,cy-b:cy+b,...]
+    else: 
+        return crop(X),crop(Y)
+
+
 
 def get_slides(X,axis):
     def generator():
@@ -79,7 +93,7 @@ def gaussian_noise(x):
     x = x + tf.random.normal(shape=tf.shape(x), mean=0.0, stddev=0.0002, dtype=tf.dtypes.float32)
     return x
 
-def rotation_and_scale(x,y):
+def rotation_and_scale(x,y,random_crop=False):
     scale = tf.random.uniform(shape=[], minval=0.8, maxval=1.2, dtype=tf.dtypes.float32)
     angle = tf.random.uniform(shape=[], minval=-10*np.pi/180, maxval=10*np.pi/180)
     
@@ -91,13 +105,15 @@ def rotation_and_scale(x,y):
     x = tfa.image.transform_ops.rotate(x, angle)
     y = tfa.image.transform_ops.rotate(y, angle) > 0.5
     
-    return crop(tf.cast(x,tf.float32)),crop(tf.cast(y,tf.float32))
+    return crop_random(tf.cast(x,tf.float32),tf.cast(y,tf.float32),random_crop=random_crop)
 
 def get_data(dataset,dataset_label,
-             axis,batch=50,buffer_size=100,prefetch=10,repeat=1):
+             axis,batch=50,buffer_size=100,
+             prefetch=10,repeat=1,random_crop=False):
+             
     data = get_data_2d(dataset,dataset_label,axis=axis)
     data = data.repeat(repeat)
-    data = data.map(lambda x,y : rotation_and_scale(x,y))
+    data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop))
     data = data.map(lambda x,y : (intensity_modification(x),y))
     data = data.map(lambda x,y : (gaussian_noise(x),y))
     data = data.shuffle(buffer_size=buffer_size)
