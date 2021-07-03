@@ -109,13 +109,16 @@ def rotation_and_scale(x,y,random_crop=False):
 
 def get_data(dataset,dataset_label,
              axis,batch=50,buffer_size=100,
-             prefetch=10,repeat=1,random_crop=False):
+             prefetch=10,repeat=1,augmentation=False,random_crop=False):
              
     data = get_data_2d(dataset,dataset_label,axis=axis)
-    data = data.repeat(repeat)
-    data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop))
-    data = data.map(lambda x,y : (intensity_modification(x),y))
-    data = data.map(lambda x,y : (gaussian_noise(x),y))
+    if augmentation:
+        data = data.repeat(repeat)
+        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop))
+        data = data.map(lambda x,y : (intensity_modification(x),y))
+        data = data.map(lambda x,y : (gaussian_noise(x),y))
+    else: 
+        data = data.map(lambda x,y : (crop(x),crop(y[...,tf.newaxis])))
     data = data.shuffle(buffer_size=buffer_size)
     data = data.batch(batch)
     data = data.prefetch(prefetch)
