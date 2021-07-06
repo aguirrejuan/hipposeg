@@ -59,19 +59,19 @@ def go_down(name='encoder'):
 def go_up(name='decoder'):
     shape = [512,512,256,128,64]
     X = input_ = [Input(shape=[None,None,i]) for i in shape]
-    x = Conv2DTranspose(filters=256//2,kernel_size=2,strides=2,use_bias=False)(X[0])
+    x = Conv2DTranspose(filters=512,kernel_size=2,strides=2,use_bias=False)(X[0])
     x = concatenate([x,X[1]])
     x = convBlock(filters=256)(x)
 
-    x = Conv2DTranspose(filters=128//2,kernel_size=2,strides=2,use_bias=False)(x)
+    x = Conv2DTranspose(filters=256,kernel_size=2,strides=2,use_bias=False)(x)
     x = concatenate([x,X[2]])
     x = convBlock(filters=128)(x)
 
-    x = Conv2DTranspose(filters=64//2,kernel_size=2,strides=2,use_bias=False)(x)
+    x = Conv2DTranspose(filters=128,kernel_size=2,strides=2,use_bias=False)(x)
     x = concatenate([x,X[3]])
     x = convBlock(filters=64)(x)
 
-    x = Conv2DTranspose(filters=64//2,kernel_size=2,strides=2,use_bias=False)(x)
+    x = Conv2DTranspose(filters=64,kernel_size=2,strides=2,use_bias=False)(x)
     x = concatenate([x,X[4]])
     x = convBlock(filters=64)(x)
 
