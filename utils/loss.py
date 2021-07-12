@@ -8,19 +8,14 @@ def GDL_loss(y_true,y_pred):
     y_true \in \mathbb{R}^{BxHxWxC}
     y_pred \in \mathbb{R}^{BxHxWxC}
     """
-    B = tf.shape(y_true)[0]
-    result = 0.0
-    for b in range(B):
-        if tf.reduce_sum(y_true[b]) == 0: 
-            continue
-        y,y_hat = y_true[b],y_pred[b]
-        wG = 1/tf.einsum('ijk->',y)**2
-        wB = 1/tf.einsum('ijk->',1-y)**2
-        numerator = wG*tf.einsum('ijk,ijk->',y,y_hat) + wB* tf.einsum('ijk,ijk->',1-y,1-y_hat)
-        denominator = wG*tf.einsum('ijk->',y+y_hat) + wB*tf.einsum('ijk->',2-y-y_hat)
-        result += 1 -2*numerator/denominator
-
-    return result/tf.cast(B,tf.float32)
+    eps= tf.constant(1e-20)
+    y,y_hat = y_true,y_pred
+    wG = 1/(tf.einsum('bijk->b',y)**2 - eps)
+    wB = 1/tf.einsum('bijk->b',1-y)**2
+    numerator = wG*tf.einsum('bijk,bijk->b',y,y_hat) + wB* tf.einsum('bijk,bijk->b',1-y,1-y_hat)
+    denominator = wG*tf.einsum('bijk->b',y+y_hat) + wB*tf.einsum('bijk->b',2-y-y_hat)
+  
+    return  tf.reduce_mean(1 - 2*(numerator+eps)/(denominator+eps))
 
 def distmaps(y_true):
     k = tf.shape(y_true)[0]
