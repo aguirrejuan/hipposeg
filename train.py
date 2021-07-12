@@ -33,6 +33,8 @@ parser.add_argument('--fine_tune',help='epochs training',action='store_true')
 
 parser.add_argument('--evaluate',help='evaluate Model', action='store_true')
 
+parser.add_argument('--augmentation',help='data augmentation', action='store_true')
+
 parser.add_argument('--models',help='evaluate Model', default='012')
 
 
@@ -80,7 +82,7 @@ def main():
         if str(i) not in args.models:
             continue
         batch_size = batch_size_pre*strategy.num_replicas_in_sync 
-        train =  get_data(train_dataset,train_dataset_label, axis=i,batch=batch_size,repeat=repeat,augmentation=True)
+        train =  get_data(train_dataset,train_dataset_label, axis=i,batch=batch_size,repeat=repeat,augmentation=args.augmentation)
         #test  =  get_data(test_dataset,test_dataset_label,axis=i)
         val  =   get_data(val_dataset,val_dataset_label,axis=i,repeat=repeat) if val_dataset != None else None 
 
