@@ -15,7 +15,6 @@ from utils.plot import plot_predict
 def minmax_normalization(x):
     return (x-tf.reduce_min(x))/(tf.reduce_max(x)-tf.reduce_min(x))
 
-cfg.CROP = 160
 def crop(X):
     b = cfg.CROP//2
     shape = tf.shape(X)

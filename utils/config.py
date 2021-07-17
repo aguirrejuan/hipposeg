@@ -5,4 +5,4 @@ __C                           = edict()
 
 cfg                           = __C
 
-__C.CROP  = 64 
+__C.CROP  = 160 
