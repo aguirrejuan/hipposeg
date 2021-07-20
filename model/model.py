@@ -1,5 +1,6 @@
 from tensorflow.keras import Model
 import tensorflow as tf
+from glob import glob
 
 from tensorflow.keras.layers import (
         Conv2D,
@@ -85,23 +86,22 @@ def get_model(name='UNet2D'):
     x = go_up()(X)
     return Model(input_,x,name=name)
 
-def get_model_transfer(name='UNet2D',vgg_path='./model/vgg11'):
+def get_model_transfer(name='UNet2D',vgg_path='./model/models/vgg11'):
     model = get_model(name=name)
     transfer(model,vgg_path=vgg_path)
     return model 
 
 
-def load_model(name='name',dir_weights='./model/weights_sagital/'):
-    model = get_model(name=name)
-    latest = tf.train.latest_checkpoint(dir_weights)
-    model.load_weights(latest).expect_partial()
+def load_model(name='name',dir_model='./model/models/'):
+    latest = sorted(glob(f'{dir_model}model_{name}*'))[-1]
+    model = tf.keras.models.load_model(latest)
     return model
 
 
 def load_models():
-    model_sagital = load_model(name='sagital',dir_weights='./model/weights_sagital/')
-    model_coronal = load_model(name='coronal',dir_weights='./model/weights_coronal/')
-    model_axial = load_model(name='axial',dir_weights='./model/weights_axial/')
+    model_sagital = load_model(name='sagital')
+    model_coronal = load_model(name='coronal')
+    model_axial = load_model(name='axial')
     return model_sagital,model_coronal,model_axial
 
 

@@ -43,11 +43,11 @@ args = parser.parse_args()
 loss = GDL_loss
 
 def get_callback(name,batch_size,epoch):
-    checkpoint_path = f'./model/weights_{name}'+'/cp-{epoch:04d}.ckpt'
+    checkpoint_path = f'./model/models/model_{name}_{epoch:04d}.h5'
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_path, 
         verbose=1, 
-        save_weights_only=True,
+        save_weights_only=False,
         save_freq=epoch*batch_size)
     return cp_callback
 
@@ -90,7 +90,7 @@ def main():
         with strategy.scope():
             if args.fine_tune:
                 logging.info('Loading Model for Fine Tune')
-                model = load_model(name=models[i],dir_weights=f'./model/weights_{models[i]}/')
+                model = load_model(name=models[i],dir_model='./model/models/')
             else:
                 logging.info('Loading Model From scratch')
                 model = get_model_transfer(name=models[i])
@@ -108,7 +108,7 @@ def main():
         logging.info('Trainig')
         history = model.fit(train,epochs=epochs,
                                    callbacks=[cp_callback,
-                                   tf.keras.callbacks.TensorBoard(log_dir=f'./model/{models[i]}_logs')],
+                                   tf.keras.callbacks.TensorBoard(log_dir=f'./model/models/{models[i]}_logs')],
                                     validation_data=val
                                     )
 
