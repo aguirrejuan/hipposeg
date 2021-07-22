@@ -118,7 +118,7 @@ def get_data(dataset,dataset_label,
         data = data.map(lambda x,y : (gaussian_noise(x),y))
     else: 
         data = data.map(lambda x,y : (crop(x),crop(y[...,tf.newaxis])))
-    data = data.shuffle(buffer_size=buffer_size)
+    data = data.shuffle(buffer_size=buffer_size, seed=42)
     data = data.batch(batch)
     data = data.prefetch(prefetch)
     return data
