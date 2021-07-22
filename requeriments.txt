@@ -2,3 +2,5 @@ easydict
 tensorflow
 nibabel
 tensorflow_addons
+dvc 
+pydrive2
