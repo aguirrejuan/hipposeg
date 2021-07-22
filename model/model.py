@@ -2,6 +2,12 @@ from tensorflow.keras import Model
 import tensorflow as tf
 from glob import glob
 
+
+
+def kernel_initializer(seed=42):
+  return tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.05, seed=seed)
+
+
 from tensorflow.keras.layers import (
         Conv2D,
         Conv2DTranspose,
@@ -29,13 +35,19 @@ def transfer(model,vgg_path='./vgg11'):
 def convBlock(filters):
     def block(x):
         x_i = x
-        x = Conv2D(filters=filters,kernel_size=3,padding='same',use_bias=False)(x)
+        x = Conv2D(filters=filters,kernel_size=3,padding='same',
+                                                use_bias=False,
+                                                kernel_initializer=kernel_initializer(seed=32))(x)
         x = BatchNormalization()(x)
         x = ReLU()(x)
-        x = Conv2D(filters=filters,kernel_size=3,padding='same',use_bias=False)(x)
+        x = Conv2D(filters=filters,kernel_size=3,padding='same',
+                                                use_bias=False,
+                                                kernel_initializer=kernel_initializer(seed=45))(x)
         x = BatchNormalization()(x)
         x = ReLU()(x)
-        x_i = Conv2D(filters=filters,kernel_size=1,padding='same',use_bias=False)(x_i)
+        x_i = Conv2D(filters=filters,kernel_size=1,padding='same',
+                                                  use_bias=False,
+                                                  kernel_initializer=kernel_initializer(seed=76))(x_i)
         x = Add()([x,x_i])
         return x 
     return block
@@ -60,23 +72,33 @@ def go_down(name='encoder'):
 def go_up(name='decoder'):
     shape = [512,512,256,128,64]
     X = input_ = [Input(shape=[None,None,i]) for i in shape]
-    x = Conv2DTranspose(filters=512,kernel_size=2,strides=2,use_bias=False)(X[0])
+    x = Conv2DTranspose(filters=512,kernel_size=2,strides=2,
+                                              use_bias=False,
+                                              kernel_initializer=kernel_initializer(seed=87))(X[0])
     x = concatenate([x,X[1]])
     x = convBlock(filters=256)(x)
 
-    x = Conv2DTranspose(filters=256,kernel_size=2,strides=2,use_bias=False)(x)
+    x = Conv2DTranspose(filters=256,kernel_size=2,strides=2,
+                                                  use_bias=False,
+                                                  kernel_initializer=kernel_initializer(seed=98))(x)
     x = concatenate([x,X[2]])
     x = convBlock(filters=128)(x)
 
-    x = Conv2DTranspose(filters=128,kernel_size=2,strides=2,use_bias=False)(x)
+    x = Conv2DTranspose(filters=128,kernel_size=2,strides=2,
+                                                  use_bias=False,
+                                                  kernel_initializer=kernel_initializer(seed=27))(x)
     x = concatenate([x,X[3]])
     x = convBlock(filters=64)(x)
 
-    x = Conv2DTranspose(filters=64,kernel_size=2,strides=2,use_bias=False)(x)
+    x = Conv2DTranspose(filters=64,kernel_size=2,strides=2,
+                                                use_bias=False,
+                                                kernel_initializer=kernel_initializer(seed=10))(x)
     x = concatenate([x,X[4]])
     x = convBlock(filters=64)(x)
 
-    x = Conv2D(filters=1,kernel_size=3,padding='same',activation='sigmoid',use_bias=False)(x)
+    x = Conv2D(filters=1,kernel_size=3,padding='same',activation='sigmoid',
+                                                          use_bias=False,
+                                                          kernel_initializer=kernel_initializer(seed=23))(x)
     #x = Softmax()(x)
     return Model(input_,x,name=name)
 
