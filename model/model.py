@@ -114,9 +114,16 @@ def get_model_transfer(name='UNet2D',vgg_path='./model/models/vgg11'):
     return model 
 
 
+#def load_model(name='name',dir_model='./model/models/'):
+#    latest = sorted(glob(f'{dir_model}model_{name}*'))[-1]
+#    model = tf.keras.models.load_model(latest)
+#    return model
+
 def load_model(name='name',dir_model='./model/models/'):
-    latest = sorted(glob(f'{dir_model}model_{name}*'))[-1]
-    model = tf.keras.models.load_model(latest)
+    dir_weights = f'{dir_model}{name}/'
+    model = get_model(name=name)
+    latest = tf.train.latest_checkpoint(dir_weights)
+    model.load_weights(latest).expect_partial()
     return model
 
 
