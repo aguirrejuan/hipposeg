@@ -114,7 +114,7 @@ def get_data(dataset,dataset_label,
     data = get_data_2d(dataset,dataset_label,axis=axis)
     if augmentation:
         data = data.repeat(repeat)
-        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop))
+        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop))
         data = data.map(lambda x,y : (intensity_modification(x),y))
         data = data.map(lambda x,y : (gaussian_noise(x),y))
     else: 
