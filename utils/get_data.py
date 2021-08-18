@@ -23,7 +23,7 @@ def crop(X,size_crop=cfg.CROP):
     return X[cx-b:cx+b,cy-b:cy+b,...]
 
 def crop_random(X,Y,random_crop=False,size_crop=cfg.CROP):
-    b = size_crop/2
+    b = size_crop//2
     shape = tf.shape(X)
     if random_crop: 
         cx = tf.random.uniform(shape=(1,),minval=b,maxval=(shape[0]-b),dtype=tf.int32)[0]
