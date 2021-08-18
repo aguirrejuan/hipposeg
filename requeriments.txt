@@ -4,4 +4,4 @@ tensorflow-gpu==2.5.0
 nibabel
 tensorflow_addons==0.13.0
 dvc 
-pydrive2
+pydrive2==1.8.3
