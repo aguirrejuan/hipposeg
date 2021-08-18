@@ -104,7 +104,7 @@ def rotation_and_scale(x,y,random_crop=False,size_crop=160):
     x = tfa.image.transform_ops.rotate(x, angle)
     y = tfa.image.transform_ops.rotate(y, angle) > 0.5
     
-    return crop_random(tf.cast(x,tf.float32),tf.cast(y,tf.float32),random_crop=random_crop,size_crop=size_crop)
+    return crop_random(tf.cast(x,tf.float32),tf.cast(y[...,tf.newaxis],tf.float32),random_crop=random_crop,size_crop=size_crop)
 
 def get_data(dataset,dataset_label,
              axis,batch=50,buffer_size=100,
