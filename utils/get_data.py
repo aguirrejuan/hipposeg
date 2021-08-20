@@ -69,7 +69,7 @@ def generator_2D(dataset,axis=0,pixels=0):
                 x_3,y_3 = X[(slice(None),)*axis+(index[2],)], Y[(slice(None),)*axis+(index[2],)]
                 x = [tf.expand_dims(x_i,axis=2) for x_i in [x_1,x_2,x_3]]
                 #y = [tf.expand_dims(y_i,axis=2) for y_i in [y_1,y_2,y_3]]
-                if tf.reduce_sum(y) < pixels:
+                if tf.reduce_sum(y_2) < pixels:
                     continue
                 yield tf.concat(x,axis=2),y_2
     return generator 
