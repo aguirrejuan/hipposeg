@@ -106,25 +106,16 @@ def rotation_and_scale(x,y,random_crop=False,size_crop=160):
     
     return crop_random(tf.cast(x,tf.float32),tf.cast(y,tf.float32),random_crop=random_crop,size_crop=size_crop)
 
-def get_hipp(pixels):
-    def filter(x,y):
-        if tf.reduce_sum(y) > pixels:
-            return True
-        return False
-    return filter
-
 
 def get_data(dataset,dataset_label,
              axis,batch=50,buffer_size=100,
              prefetch=10,repeat=1,augmentation=False,random_crop=False,
-             size_crop=cfg.CROP,
-            pixels=0):
+             size_crop=cfg.CROP):
              
     data = get_data_2d(dataset,dataset_label,axis=axis)
     if augmentation:
         data = data.repeat(repeat)
         data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop))
-        data = data.filter(get_hipp(pixels))
         data = data.map(lambda x,y : (intensity_modification(x),y))
         data = data.map(lambda x,y : (gaussian_noise(x),y))
     else: 
