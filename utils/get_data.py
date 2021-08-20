@@ -59,7 +59,7 @@ def generator_load(path_mri,path_label):
             yield tf.constant(nib.load(X).get_fdata(), "float64"), tf.constant(nib.load(Y).get_fdata(), "float64")
     return generator
 
-def generator_2D(dataset,axis=0):
+def generator_2D(dataset,axis=0,pixels=0):
     def generator():
         for X,Y in dataset:
             for i in range(tf.shape(X)[axis]):
@@ -69,15 +69,17 @@ def generator_2D(dataset,axis=0):
                 x_3,y_3 = X[(slice(None),)*axis+(index[2],)], Y[(slice(None),)*axis+(index[2],)]
                 x = [tf.expand_dims(x_i,axis=2) for x_i in [x_1,x_2,x_3]]
                 #y = [tf.expand_dims(y_i,axis=2) for y_i in [y_1,y_2,y_3]]
+                if tf.reduce_sum(y) < pixels:
+                    continue
                 yield tf.concat(x,axis=2),y_2
     return generator 
 
-def get_data_2d(path_mri,path_label,axis=0):
+def get_data_2d(path_mri,path_label,axis=0,pixels=0):
     data = tf.data.Dataset.from_generator(generator_load(path_mri,path_label),
                                     output_signature = (tf.TensorSpec((None, None, None), tf.float32), 
                                                         tf.TensorSpec((None, None, None), tf.float32)))
     data = data.map(lambda x,y:(minmax_normalization(x),y))
-    data2D = tf.data.Dataset.from_generator(generator_2D(data,axis=axis),
+    data2D = tf.data.Dataset.from_generator(generator_2D(data,axis=axis,pixels=pixels),
                                     output_signature = (tf.TensorSpec((None, None,None), tf.float32), 
                                                         tf.TensorSpec((None,None), tf.float32)))
     return data2D
@@ -109,9 +111,10 @@ def rotation_and_scale(x,y,random_crop=False,size_crop=160):
 def get_data(dataset,dataset_label,
              axis,batch=50,buffer_size=100,
              prefetch=10,repeat=1,augmentation=False,random_crop=False,
-             size_crop=cfg.CROP):
+             size_crop=cfg.CROP,
+            pixels=0):
              
-    data = get_data_2d(dataset,dataset_label,axis=axis)
+    data = get_data_2d(dataset,dataset_label,axis=axis,pixels=pixels)
     if augmentation:
         data = data.repeat(repeat)
         data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop))
