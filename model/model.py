@@ -19,7 +19,7 @@ from tensorflow.keras.layers import (
         concatenate,
         Softmax)
 
-def transfer(model,vgg_path='./vgg11'):
+def transfer(model,vgg_path='./vgg11',trainable=False):
     vgg11 = tf.keras.models.load_model(vgg_path)
     layersVgg = vgg11.layers 
     for layerVgg in layersVgg:
@@ -27,7 +27,7 @@ def transfer(model,vgg_path='./vgg11'):
             try:
                 if layerVgg.get_weights()[0].shape == layerModel.get_weights()[0].shape:
                     layerModel.set_weights([layerVgg.get_weights()[0]])
-                    layerModel.trainable = False
+                    layerModel.trainable = trainable
                     break
             except:
                 pass
@@ -108,9 +108,9 @@ def get_model(name='UNet2D'):
     x = go_up()(X)
     return Model(input_,x,name=name)
 
-def get_model_transfer(name='UNet2D',vgg_path='./model/models/vgg11'):
+def get_model_transfer(name='UNet2D',vgg_path='./model/models/vgg11',trainable=False):
     model = get_model(name=name)
-    transfer(model,vgg_path=vgg_path)
+    transfer(model,vgg_path=vgg_path,trainable=trainable)
     return model 
 
 
