@@ -14,7 +14,7 @@ from tensorflow.keras.layers import (
         BatchNormalization,
         Input,
         Add,
-        ReLU,
+        LeakyReLU,
         MaxPool2D,
         concatenate,
         Softmax)
@@ -39,12 +39,12 @@ def convBlock(filters):
                                                 use_bias=False,
                                                 kernel_initializer=kernel_initializer(seed=32))(x)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
+        x = LeakyReLU(0.01)(x)
         x = Conv2D(filters=filters,kernel_size=3,padding='same',
                                                 use_bias=False,
                                                 kernel_initializer=kernel_initializer(seed=45))(x)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
+        x = LeakyReLU(0.01)(x)
         x_i = Conv2D(filters=filters,kernel_size=1,padding='same',
                                                   use_bias=False,
                                                   kernel_initializer=kernel_initializer(seed=76))(x_i)
