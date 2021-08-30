@@ -128,16 +128,16 @@ def get_data(dataset,dataset_label,
     if augmentation:
         data = data.repeat(repeat)
         data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop),
-                        num_parallel_calls=tf.data.AUTOTUNE).cache())
+                        num_parallel_calls=tf.data.AUTOTUNE)
         if pixels != 0:
           data = data.filter(get_hippo(pixels=pixels))
         data = data.map(lambda x,y : (intensity_modification(x),y),
-                        num_parallel_calls=tf.data.AUTOTUNE).cache())
+                        num_parallel_calls=tf.data.AUTOTUNE)
         data = data.map(lambda x,y : (gaussian_noise(x),y),
-                        num_parallel_calls=tf.data.AUTOTUNE).cache())
+                        num_parallel_calls=tf.data.AUTOTUNE)
     else: 
         data = data.map(lambda x,y : (crop(x,size_crop=size_crop),crop(y[...,tf.newaxis],size_crop=size_crop)),
-                         num_parallel_calls=tf.data.AUTOTUNE).cache()
+                         num_parallel_calls=tf.data.AUTOTUNE)
         if pixels !=0 :
           data = data.filter(get_hippo(pixels=pixels))
     data = data.shuffle(buffer_size=buffer_size, seed=42)
