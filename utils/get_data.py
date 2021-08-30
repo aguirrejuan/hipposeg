@@ -8,9 +8,12 @@ import nibabel as nib
 from glob import glob 
 import os 
 
-from utils.config import cfg
 
-from utils.plot import plot_predict
+class Cfg:
+    def __init__(self):
+        self.CROP = 160 
+
+cfg = Cfg()
 
 def minmax_normalization(x):
     return (x-tf.reduce_min(x))/(tf.reduce_max(x)-tf.reduce_min(x))
@@ -124,24 +127,21 @@ def get_data(dataset,dataset_label,
     data = get_data_2d(dataset,dataset_label,axis=axis)
     if augmentation:
         data = data.repeat(repeat)
-        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop))
-        data = data.filter(get_hippo(pixels=pixels))
-        data = data.map(lambda x,y : (intensity_modification(x),y))
-        data = data.map(lambda x,y : (gaussian_noise(x),y))
+        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop),
+                        num_parallel_calls=tf.data.AUTOTUNE).cache())
+        if pixels != 0:
+          data = data.filter(get_hippo(pixels=pixels))
+        data = data.map(lambda x,y : (intensity_modification(x),y),
+                        num_parallel_calls=tf.data.AUTOTUNE).cache())
+        data = data.map(lambda x,y : (gaussian_noise(x),y),
+                        num_parallel_calls=tf.data.AUTOTUNE).cache())
     else: 
-        data = data.map(lambda x,y : (crop(x,size_crop=size_crop),crop(y[...,tf.newaxis],size_crop=size_crop)))
-        data = data.filter(get_hippo(pixels=pixels))
+        data = data.map(lambda x,y : (crop(x,size_crop=size_crop),crop(y[...,tf.newaxis],size_crop=size_crop)),
+                         num_parallel_calls=tf.data.AUTOTUNE).cache()
+        if pixels !=0 :
+          data = data.filter(get_hippo(pixels=pixels))
     data = data.shuffle(buffer_size=buffer_size, seed=42)
     data = data.batch(batch)
-    data = data.prefetch(prefetch)
+    data = data.prefetch(tf.data.AUTOTUNE)
     return data
 
-
-if  __name__ == "__main__":
-    train_dataset = './images_100/'
-    train_dataset_label = './Labels_100/'
-    train_data = get_data(train_dataset,train_dataset_label,axis=0,batch=1)
-    for data in train_data:
-        if np.sum(data[1]) > 100:
-            plot_predict(data[0][0,...,1],data[1][0,:,:,0]>0.5,data[1][0,:,:,0]>0.5)
-            break
