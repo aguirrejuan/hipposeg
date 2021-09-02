@@ -8,33 +8,36 @@ import nibabel as nib
 from glob import glob 
 import os 
 
-from utils.config import cfg
 
-from utils.plot import plot_predict
+class Cfg:
+    def __init__(self):
+        self.CROP = 160 
+
+cfg = Cfg()
 
 def minmax_normalization(x):
     return (x-tf.reduce_min(x))/(tf.reduce_max(x)-tf.reduce_min(x))
 
-def crop(X):
-    b = cfg.CROP//2
+def crop(X,size_crop=cfg.CROP):
+    b = size_crop//2
     shape = tf.shape(X)
     cx= shape[0]//2
     cy= shape[1]//2
     return X[cx-b:cx+b,cy-b:cy+b,...]
 
-def crop_random(X,Y,random_crop=False,b=cfg.CROP):
-    b = cfg.CROP//2
+def crop_random(X,Y,random_crop=False,size_crop=cfg.CROP):
+    b = size_crop//2
     shape = tf.shape(X)
     if random_crop: 
         cx = tf.random.uniform(shape=(1,),minval=b,maxval=(shape[0]-b),dtype=tf.int32)[0]
         cy = tf.random.uniform(shape=(1,),minval=b,maxval=(shape[1]-b),dtype=tf.int32)[0]
         return X[cx-b:cx+b,cy-b:cy+b,...], Y[cx-b:cx+b,cy-b:cy+b,...]
     else: 
-        return crop(X),crop(Y)
+        return crop(X,size_crop=size_crop),crop(Y,size_crop=size_crop)
 
 
 
-def get_slides(X,axis):
+def get_slides(X,axis,size_crop=cfg.CROP):
     def generator():
         for i in range(tf.shape(X)[axis]):
             index = [i if j < 0 or j >= tf.shape(X)[axis] else j for j in range(i-1,i+2)]
@@ -42,14 +45,14 @@ def get_slides(X,axis):
             x_2 = X[(slice(None),)*axis+(index[1],)]
             x_3 = X[(slice(None),)*axis+(index[2],)]
             x = [tf.expand_dims(x_i,axis=2) for x_i in [x_1,x_2,x_3]]
-            yield crop(tf.concat(x,axis=2))
+            yield crop(tf.concat(x,axis=2),size_crop=size_crop)
     return generator
         
-def load_mri(vol_path):
+def load_mri(vol_path,size_crop=cfg.CROP):
     X = tf.constant(nib.load(vol_path).get_fdata(), "float64")
     X = minmax_normalization(X)
     shape = X.shape
-    return get_slides(X,0),get_slides(X,1),get_slides(X,2),shape
+    return get_slides(X,0,size_crop),get_slides(X,1,size_crop),get_slides(X,2,size_crop),shape
 
 def generator_load(path_mri,path_label):
     mris = sorted(glob(os.path.join(path_mri,'*.nii')))
@@ -92,7 +95,7 @@ def gaussian_noise(x):
     x = x + tf.random.normal(shape=tf.shape(x), mean=0.0, stddev=0.0002, dtype=tf.dtypes.float32)
     return x
 
-def rotation_and_scale(x,y,random_crop=False):
+def rotation_and_scale(x,y,random_crop=False,size_crop=160):
     scale = tf.random.uniform(shape=[], minval=0.8, maxval=1.2, dtype=tf.dtypes.float32)
     angle = tf.random.uniform(shape=[], minval=-10*np.pi/180, maxval=10*np.pi/180)
     
@@ -104,31 +107,40 @@ def rotation_and_scale(x,y,random_crop=False):
     x = tfa.image.transform_ops.rotate(x, angle)
     y = tfa.image.transform_ops.rotate(y, angle) > 0.5
     
-    return crop_random(tf.cast(x,tf.float32),tf.cast(y,tf.float32),random_crop=random_crop)
+    return crop_random(tf.cast(x,tf.float32),tf.cast(y,tf.float32),random_crop=random_crop,size_crop=size_crop)
+
+
+def get_hippo(pixels):
+    def filter(x,y):
+        if tf.reduce_sum(y) > pixels:
+            return True
+        else:
+            return False 
+    return filter 
 
 def get_data(dataset,dataset_label,
              axis,batch=50,buffer_size=100,
-             prefetch=10,repeat=1,augmentation=False,random_crop=False):
+             prefetch=10,repeat=1,augmentation=False,random_crop=False,
+             size_crop=cfg.CROP,
+            pixels=0):
              
     data = get_data_2d(dataset,dataset_label,axis=axis)
     if augmentation:
         data = data.repeat(repeat)
-        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop))
-        data = data.map(lambda x,y : (intensity_modification(x),y))
-        data = data.map(lambda x,y : (gaussian_noise(x),y))
+        data = data.map(lambda x,y : rotation_and_scale(x,y,random_crop=random_crop,size_crop=size_crop),
+                        num_parallel_calls=tf.data.AUTOTUNE)
+        if pixels != 0:
+          data = data.filter(get_hippo(pixels=pixels))
+        data = data.map(lambda x,y : (intensity_modification(x),y),
+                        num_parallel_calls=tf.data.AUTOTUNE)
+        data = data.map(lambda x,y : (gaussian_noise(x),y),
+                        num_parallel_calls=tf.data.AUTOTUNE)
     else: 
-        data = data.map(lambda x,y : (crop(x),crop(y[...,tf.newaxis])))
-    data = data.shuffle(buffer_size=buffer_size)
+        data = data.map(lambda x,y : (crop(x,size_crop=size_crop),crop(y[...,tf.newaxis],size_crop=size_crop)),
+                         num_parallel_calls=tf.data.AUTOTUNE)
+        if pixels !=0 :
+          data = data.filter(get_hippo(pixels=pixels))
+    data = data.shuffle(buffer_size=buffer_size, seed=42)
     data = data.batch(batch)
-    data = data.prefetch(prefetch)
+    data = data.prefetch(tf.data.AUTOTUNE)
     return data
-
-
-if  __name__ == "__main__":
-    train_dataset = './images_100/'
-    train_dataset_label = './Labels_100/'
-    train_data = get_data(train_dataset,train_dataset_label,axis=0,batch=1)
-    for data in train_data:
-        if np.sum(data[1]) > 100:
-            plot_predict(data[0][0,...,1],data[1][0,:,:,0]>0.5,data[1][0,:,:,0]>0.5)
-            break
