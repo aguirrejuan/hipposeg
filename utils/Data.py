@@ -214,7 +214,7 @@ def get_data(path_imgs,path_masks,axis=0,
                     num_parallel_calls=tf.data.AUTOTUNE)
 
     if cache:
-      data = data.cache()
+      data = data.cache('data.CACHE')
 
     if pixels != 0:
       data = data.filter(get_hippo(pixels=pixels))
