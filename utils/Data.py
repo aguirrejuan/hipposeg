@@ -196,7 +196,7 @@ def get_data(path_imgs,path_masks,axis=0,
              batch=50,buffer_size=300,
              size_crop=160,random_crop=False,
              augmentation=False,repeat=1,
-             pixels=0,cache=True,
+             pixels=0,cache=True,RAM=False
              ): 
     """ Returns dataset already preprocessed
     """
@@ -214,7 +214,7 @@ def get_data(path_imgs,path_masks,axis=0,
                     num_parallel_calls=tf.data.AUTOTUNE)
 
     if cache:
-      data = data.cache('data.CACHE')
+      data = data.cache('data.CACHE') if not RAM else data.cache()
 
     if pixels != 0:
       data = data.filter(get_hippo(pixels=pixels))
